@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Weld Logging Messages - Index - {{json.version}}</title>
+<style>
+{{>styles.css}}
+</style>
+</head>
+<body>
+  {{#with json}}
+  <h1>Weld Logging Messages - Index</h1>
+  <table>
+    <tr>
+        <th>Version</th>
+        <th>File</th>
+        <th>Messages</th>
+    </tr>
+    <tr>
+    <td><div class="boxed version">{{version}}</div></td>
+    <td><code>{{indexFile}}</code></td>
+    <td>{{total}}</td>
+    </tr>
+  </table>
+  <h2>Messages</h2>
+  {{#each messages}}
+  <div class="msg-container">
+    <div class="msg-title">
+        <span class="idx">{{iterIndex}}.</span> <div class="boxed ID">ID: {{msg.id}}</div> {{#if log}}<div class="boxed {{log.level}}">{{log.level}}</div>{{/if}}
+    </div>
+    {{>msg-source.html}}
+    {{#if desc}}
+    <div class="msg-desc">
+        {{&desc}}
+    </div>
+    {{/if}}
+  </div>
+  {{/each}}
+  {{/with}}
+  Generated at {{timestamp}}.
+</body>
+</html>

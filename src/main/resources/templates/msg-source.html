@@ -1,0 +1,6 @@
+<div class="msg-source">
+    <div class="iface">{{method.interface}}</div>
+    {{#if log}}<span class="ann">@LogMessage</span>(level = Level.{{log.level}}{{#if loggingClass}}, {{loggingClass}}{{/if}})<br/>{{/if}}
+    <span class="ann">@Message</span>(id = {{msg.id}}, value = <span class="msg-val">"{{msg.value}}"</span>{{#if format}}, format = Format.{{msg.format}}{{/if}})<br/>
+    <span class="retType">{{method.retType}}</span> <span class="msg-sig">{{method.sig}}</span>;
+</div>

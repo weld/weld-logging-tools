@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Weld Logging Messages - Index Diff</title>
+<style>
+{{>styles.css}}
+</style>
+</head>
+<body>
+  {{#with json}}
+  <h1>Weld Logging Messages - Index Diff</h1>
+  <table>
+    <tr>
+        <td>Detect only collisions:</td>
+        <td><code>{{detectCollisionsOnly}}</code></td>
+    </tr>
+  </table>
+  <h2>Compared Indexes</h2>
+  <table>
+    <tr>
+        <th>Version</th>
+        <th>File</th>
+        <th>Messages</th>
+    </tr>
+    {{#each indexes}}
+    <tr>
+        <td><div class="boxed version">{{version}}</div></td>
+        <td><code>{{filePath}}</code></td>
+        <td>{{total}}</td>
+    </tr>
+    {{/each}}
+  </table>
+  <h2>Differences ({{total}})</h2>
+  {{#each differences}}
+    <div class="diff-container">
+        <div class="diff-title"><span class="idx">{{iterIndex}}.</span> ID: {{id}}</div>
+        {{#each messages}}
+        <div class="msg-container">
+          <div class="msg-title">
+            <div class="boxed version">{{version}}</div>  <div class="boxed ID">ID: {{value.msg.id}}</div> {{#if value.log}}<div class="boxed {{value.log.level}}">{{value.log.level}}</div>{{/if}}
+          </div>
+          {{#with value}}
+          {{>msg-source.html}}
+          {{#if desc}}
+          <div class="msg-desc">
+            {{&desc}}
+          </div>
+          {{/if}}
+          {{/with}}
+       </div>
+       {{/each}}
+    </div>
+  {{/each}}
+  {{/with}}
+  Generated at {{timestamp}}.
+</body>
+</html>
