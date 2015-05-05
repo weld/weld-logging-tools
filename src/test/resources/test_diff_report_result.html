@@ -111,10 +111,12 @@ span.msg-sig {
 
 span.msg-val {
   color: blue;
+  font-weight: bold;
 }
 
 span.ann {
   color: #737373;
+  font-weight: bold;
 }
 
 span.retType {
@@ -127,19 +129,24 @@ span.idx {
   font-weight: normal;
 }
 
-.ID {
+.id {
   background-color: black;
-  width: 5em;
+  width: 6.2em;
 }
 
-.version {
+.id-title {
+  background-color: black;
+  width: 8em;
+}
+
+.version, .code {
   background-color: #D2691E;
 }
 
 .iface {
   font-weight: bold;
   margin-bottom: 5px;
-  font-size: 110%;
+  font-size: 105%;
 }
 
 .FATAL {
@@ -194,10 +201,10 @@ span.idx {
   </table>
   <h2>Differences (1)</h2>
     <div class="diff-container">
-        <div class="diff-title"><span class="idx">1.</span> ID: 600</div>
+        <div class="diff-title boxed id-title"><span class="idx">1.</span> WELD-600</div>
         <div class="msg-container">
           <div class="msg-title">
-            <div class="boxed version">3.0.0-SNAPSHOT</div>  <div class="boxed ID">ID: 600</div> <div class="boxed DEBUG">DEBUG</div>
+            <div class="boxed version">3.0.0-SNAPSHOT</div> <div class="boxed DEBUG">DEBUG</div>
           </div>
           <div class="msg-source">
               <div class="iface">org.jboss.weld.logging.ReflectionLogger</div>
@@ -208,7 +215,7 @@ span.idx {
        </div>
         <div class="msg-container">
           <div class="msg-title">
-            <div class="boxed version">2.2.10.Final</div>  <div class="boxed ID">ID: 600</div> <div class="boxed INFO">INFO</div>
+            <div class="boxed version">2.2.10.Final</div> <div class="boxed INFO">INFO</div>
           </div>
           <div class="msg-source">
               <div class="iface">org.jboss.weld.logging.ReflectionLogger</div>
@@ -218,6 +225,6 @@ span.idx {
           </div>
        </div>
     </div>
-  Generated at Thu Apr 30 08:03:48 CEST 2015.
+  Generated at Tue May 05 14:10:43 CEST 2015.
 </body>
 </html>

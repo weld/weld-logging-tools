@@ -23,6 +23,7 @@ import static org.jboss.weld.logging.Strings.LOG_MESSAGE;
 import static org.jboss.weld.logging.Strings.MESSAGE;
 import static org.jboss.weld.logging.Strings.MESSAGES;
 import static org.jboss.weld.logging.Strings.METHOD_INFO;
+import static org.jboss.weld.logging.Strings.PROJECT_CODE;
 import static org.jboss.weld.logging.Strings.RETURN_TYPE;
 import static org.jboss.weld.logging.Strings.SIGNATURE;
 import static org.jboss.weld.logging.Strings.TOTAL;
@@ -152,7 +153,20 @@ public class LogMessageIndexGenerator extends AbstractProcessor {
             return;
         }
 
+        // First find the project code
+        String projectCode = "";
+        for (AnnotationMirror annotationMirror : processingEnv.getElementUtils().getAllAnnotationMirrors(enclosingElement)) {
+            if (Strings.MESSAGE_LOGGER_CLASS_NAME.equals(annotationMirror.getAnnotationType().toString())) {
+                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotationMirror.getElementValues().entrySet()) {
+                    if (Strings.PROJECT_CODE.equals(entry.getKey().getSimpleName().toString())) {
+                        projectCode = entry.getValue().getValue().toString();
+                    }
+                }
+            }
+        }
+
         JsonObject json = new JsonObject();
+        json.add(PROJECT_CODE, Json.wrapPrimitive(projectCode));
         // -1 represents the default value of Message.id()
         Integer id = -1;
 

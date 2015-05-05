@@ -23,6 +23,7 @@ import static org.jboss.weld.logging.Strings.ID;
 import static org.jboss.weld.logging.Strings.INDEXES;
 import static org.jboss.weld.logging.Strings.MESSAGE;
 import static org.jboss.weld.logging.Strings.MESSAGES;
+import static org.jboss.weld.logging.Strings.PROJECT_CODE;
 import static org.jboss.weld.logging.Strings.TOTAL;
 import static org.jboss.weld.logging.Strings.VALUE;
 import static org.jboss.weld.logging.Strings.VERSION;
@@ -55,6 +56,7 @@ import com.google.gson.JsonObject;
  *          "id": 600,
  *          "messages": [
  *              {
+ *                  "projectCode" : "WELD-",
  *                  "version" : "3.0.0-SNAPSHOT",
  *                  "value" : {
  *                      "method" : {
@@ -73,6 +75,7 @@ import com.google.gson.JsonObject;
  *                 }
  *              },
  *              {
+ *                  "projectCode" : "WELD-",
  *                  "version" : "2.2.10.Final",
  *                  "value" : {
  *                      "method" : {
@@ -183,7 +186,7 @@ public class LogMessageIndexDiff {
 
         // Now let's find the differences
         // Note that messages don't need to have the ID specified (0) or may inherit the ID from another message with the same name (-1)
-        JsonArray differences = findDifferences(indexes.size(), detectCollisionsOnly, buildIdMap(indexes));
+        JsonArray differences = findDifferences(indexes.size(), detectCollisionsOnly, buildDataMap(indexes));
 
         JsonObject diff = new JsonObject();
         diff.add(INDEXES, indexesMeta);
@@ -218,19 +221,35 @@ public class LogMessageIndexDiff {
         return indexes;
     }
 
-    private Map<Integer, Map<String, List<JsonObject>>> buildIdMap(List<JsonObject> indexes) {
+    /**
+     * @param indexes
+     * @return a map of project codes to map of ids to map of versions to messages
+     */
+    private Map<String, Map<Integer, Map<String, List<JsonObject>>>> buildDataMap(List<JsonObject> indexes) {
 
         // Map message ID to the map of versions to messages
         // We use the TreeMap so that the keys are ordered
-        Map<Integer, Map<String, List<JsonObject>>> idMap = new TreeMap<Integer, Map<String, List<JsonObject>>>();
+        Map<String, Map<Integer, Map<String, List<JsonObject>>>> dataMap = new HashMap<String, Map<Integer, Map<String, List<JsonObject>>>>();
 
         for (JsonObject index : indexes) {
+
             String version = index.get(VERSION).getAsString();
+
             for (JsonElement messageElement : index.get(MESSAGES).getAsJsonArray()) {
+
                 JsonObject message = messageElement.getAsJsonObject();
+
+                String projectCode = message.get(PROJECT_CODE).getAsString();
+                Map<Integer, Map<String, List<JsonObject>>> idMap = dataMap.get(projectCode);
+                if (idMap == null) {
+                    idMap = new TreeMap<Integer, Map<String, List<JsonObject>>>();
+                    dataMap.put(projectCode, idMap);
+                }
+
                 int id = message.get(MESSAGE).getAsJsonObject().get(ID).getAsInt();
                 Map<String, List<JsonObject>> versionMap = idMap.get(id);
                 List<JsonObject> messages = null;
+
                 if (versionMap == null) {
                     versionMap = new HashMap<String, List<JsonObject>>();
                     idMap.put(id, versionMap);
@@ -244,23 +263,26 @@ public class LogMessageIndexDiff {
                 messages.add(message);
             }
         }
-        return idMap;
+        return dataMap;
     }
 
-    private JsonArray findDifferences(int indexCount, boolean detectCollisionsOnly, Map<Integer, Map<String, List<JsonObject>>> idMap) {
+    private JsonArray findDifferences(int indexCount, boolean detectCollisionsOnly, Map<String, Map<Integer, Map<String, List<JsonObject>>>> dataMap) {
         JsonArray differences = new JsonArray();
-        for (Entry<Integer, Map<String, List<JsonObject>>> entry : idMap.entrySet()) {
-            if (isDifference(indexCount, detectCollisionsOnly, entry.getValue())) {
-                JsonObject difference = new JsonObject();
-                difference.add(ID, Json.wrapPrimitive(entry.getKey()));
-                JsonArray messages = new JsonArray();
-                for (Entry<String, List<JsonObject>> versionEntry : entry.getValue().entrySet()) {
-                    for (JsonObject message : versionEntry.getValue()) {
-                        messages.add(wrap(versionEntry.getKey(), message));
+        for (Entry<String, Map<Integer, Map<String, List<JsonObject>>>> entry : dataMap.entrySet()) {
+            for (Entry<Integer, Map<String, List<JsonObject>>> idEntry : entry.getValue().entrySet()) {
+                if (isDifference(indexCount, detectCollisionsOnly, idEntry.getValue())) {
+                    JsonObject difference = new JsonObject();
+                    difference.add(PROJECT_CODE, Json.wrapPrimitive(entry.getKey()));
+                    difference.add(ID, Json.wrapPrimitive(idEntry.getKey()));
+                    JsonArray messages = new JsonArray();
+                    for (Entry<String, List<JsonObject>> versionEntry : idEntry.getValue().entrySet()) {
+                        for (JsonObject message : versionEntry.getValue()) {
+                            messages.add(wrap(versionEntry.getKey(), message));
+                        }
                     }
+                    difference.add(MESSAGES, messages);
+                    differences.add(difference);
                 }
-                difference.add(MESSAGES, messages);
-                differences.add(difference);
             }
         }
         return differences;

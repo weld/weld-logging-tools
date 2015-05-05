@@ -80,6 +80,10 @@ public class LogMessageIndexDiffTest {
         ctx = getReadContext(true, new File("src/test/resources/test_diff_01.json"), new File("src/test/resources/test_diff_03.json"));
         assertThat(ctx.<Integer> read("$.total"), is(0));
         assertNull(ctx.read("$.differences"));
+
+        ctx = getReadContext(true, new File("src/test/resources/test_coll_01.json"), new File("src/test/resources/test_coll_02.json"));
+        assertThat(ctx.<Integer> read("$.total"), is(0));
+        assertNull(ctx.read("$.differences"));
     }
 
     ReadContext getReadContext(boolean detectCollisionsOnly, File... indexFiles) {
@@ -88,7 +92,7 @@ public class LogMessageIndexDiffTest {
         Collections.addAll(files, indexFiles);
         JsonObject diff = generator.generate(files, detectCollisionsOnly);
         assertNotNull(diff);
-        //System.out.println(diff);
+        // System.out.println(diff);
         return JsonPath.parse(diff.toString());
     }
 

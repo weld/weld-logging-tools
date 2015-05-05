@@ -26,7 +26,7 @@
   {{#each messages}}
   <div class="msg-container">
     <div class="msg-title">
-        <span class="idx">{{iterIndex}}.</span> <div class="boxed ID">ID: {{msg.id}}</div> {{#if log}}<div class="boxed {{log.level}}">{{log.level}}</div>{{/if}}
+        <span class="idx">{{iterIndex}}.</span> <div class="boxed id">{{projectCode}}{{msg.id}}</div> {{#if log}}<div class="boxed {{log.level}}">{{log.level}}</div>{{/if}}
     </div>
     {{>msg-source.html}}
     {{#if desc}}

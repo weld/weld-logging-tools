@@ -26,6 +26,7 @@ final class Strings {
     private Strings() {
     }
 
+    static final String MESSAGE_LOGGER_CLASS_NAME = "org.jboss.logging.annotations.MessageLogger";
     static final String MESSAGE_CLASS_NAME = "org.jboss.logging.annotations.Message";
     static final String LOG_MESSAGE_CLASS_NAME = "org.jboss.logging.annotations.LogMessage";
 
@@ -51,5 +52,6 @@ final class Strings {
     static final String ID = "id";
     static final String VALUE = "value";
     static final String FORMAT = "format";
+    static final String PROJECT_CODE = "projectCode";
 
 }
