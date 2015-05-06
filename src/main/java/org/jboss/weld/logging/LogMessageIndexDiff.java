@@ -146,8 +146,10 @@ public class LogMessageIndexDiff {
     }
 
     private static void printUsage() {
-        // TODO
-        System.out.println("TODO");
+        System.out.println("Usage: java -jar weld-logging-tools-shaded.jar [-c] -o file-name INDEXFILE...");
+        System.out.println("Options:");
+        System.out.println("  -c  detect only collisions");
+        System.out.println("  -o  name the output diff file");
     }
 
     /**

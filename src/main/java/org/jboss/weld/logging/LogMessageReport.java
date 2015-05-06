@@ -63,8 +63,7 @@ public class LogMessageReport {
     }
 
     private static void printUsage() {
-        // TODO
-        System.out.println("TODO");
+        System.out.println("Usage: java -cp weld-logging-tools-shaded.jar org.jboss.weld.logging.LogMessageReport DIFF_INDEX_FILE [REPORT_FILE]");
     }
 
     /**
