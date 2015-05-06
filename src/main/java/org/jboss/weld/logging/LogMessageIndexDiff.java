@@ -16,6 +16,7 @@
  */
 package org.jboss.weld.logging;
 
+import static org.jboss.weld.logging.Strings.ARTIFACT;
 import static org.jboss.weld.logging.Strings.DETECT_COLLISIONS_ONLY;
 import static org.jboss.weld.logging.Strings.DIFFERENCES;
 import static org.jboss.weld.logging.Strings.FILE_PATH;
@@ -29,8 +30,10 @@ import static org.jboss.weld.logging.Strings.VALUE;
 import static org.jboss.weld.logging.Strings.VERSION;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -48,10 +51,10 @@ import com.google.gson.JsonObject;
  *
  * <pre>
  * {
- *  indexes: [ { version : "3.0.0-SNAPSHOT", filePath : "/opt/source/file.json", total : 735 } , { version : "2.2.10.Final", filePath : "/opt/source/anotherFile.json", total : 745 } ],
- *  detectCollisionsOnly: false,
- *  total: 1,
- *  differences: [
+ *  "indexes": [ { "version" : "3.0.0-SNAPSHOT", "artifact" : "org.jboss.weld:weld-core-impl", "filePath" : "/opt/source/file.json", "total" : 735 } , { "version" : "2.2.10.Final", "artifact" : "org.jboss.weld:weld-core-impl", "filePath" : "/opt/source/anotherFile.json", "total" : 745 } ],
+ *  "detectCollisionsOnly": false,
+ *  "total": 1,
+ *  "differences": [
  *      {
  *          "id": 600,
  *          "messages": [
@@ -129,11 +132,20 @@ public class LogMessageIndexDiff {
                 detectCollisionsOnly = true;
             } else {
                 // Index file
-                File indexFile = new File(arg);
-                if (!indexFile.canRead() || !indexFile.isFile()) {
-                    throw new IllegalArgumentException("Unable to read the index file: " + indexFile);
+                File file = new File(arg);
+                if (!file.canRead()) {
+                    throw new IllegalArgumentException("Unable to read the index file: " + file);
                 }
-                indexFiles.add(indexFile);
+                if (file.isFile()) {
+                    indexFiles.add(file);
+                } else if (file.isDirectory()) {
+                    Collections.addAll(indexFiles, file.listFiles(new FileFilter() {
+                        @Override
+                        public boolean accept(File pathname) {
+                            return pathname.isFile() && !pathname.isHidden();
+                        }
+                    }));
+                }
             }
         }
 
@@ -146,7 +158,7 @@ public class LogMessageIndexDiff {
     }
 
     private static void printUsage() {
-        System.out.println("Usage: java -jar weld-logging-tools-shaded.jar [-c] -o file-name INDEXFILE...");
+        System.out.println("Usage: java -jar weld-logging-tools-shaded.jar [-c] -o file-name FILEORDIR...");
         System.out.println("Options:");
         System.out.println("  -c  detect only collisions");
         System.out.println("  -o  name the output diff file");
@@ -171,16 +183,17 @@ public class LogMessageIndexDiff {
 
         // Build indexes metadata and check compared versions
         JsonArray indexesMeta = new JsonArray();
-        List<JsonElement> versions = new ArrayList<JsonElement>();
+        List<String> indexesIds = new ArrayList<String>();
         for (ListIterator<JsonObject> iterator = indexes.listIterator(); iterator.hasNext();) {
             JsonObject index = iterator.next();
-            JsonElement version = index.get(VERSION);
-            if (versions.contains(version)) {
-                throw new IllegalStateException("Unable to compare index files with the same version: " + version.getAsString());
+            String indexId = index.get(VERSION).getAsString() + index.get(ARTIFACT).getAsString();
+            if (indexesIds.contains(indexId)) {
+                throw new IllegalStateException("Unable to compare index files with the same composite identifier (version and artifact id): " + indexId);
             }
-            versions.add(version);
+            indexesIds.add(indexId);
             JsonObject indexMeta = new JsonObject();
-            indexMeta.add(VERSION, version);
+            indexMeta.add(VERSION, index.get(VERSION));
+            indexMeta.add(ARTIFACT, index.get(ARTIFACT));
             indexMeta.add(TOTAL, index.get(TOTAL));
             indexMeta.add(FILE_PATH, Json.wrapPrimitive(indexFiles.get(iterator.previousIndex()).toPath().toString()));
             indexesMeta.add(indexMeta);
@@ -300,7 +313,7 @@ public class LogMessageIndexDiff {
             List<JsonObject> current = values.get(i);
             List<JsonObject> previous = values.get(i - 1);
             if (!detectCollisionsOnly && current.size() != previous.size()) {
-                // The ID not found in all indexes
+                // The ID not found in all versions
                 return true;
             }
             if (current.size() == 1) {

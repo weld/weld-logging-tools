@@ -92,7 +92,7 @@ public class LogMessageIndexDiffTest {
         Collections.addAll(files, indexFiles);
         JsonObject diff = generator.generate(files, detectCollisionsOnly);
         assertNotNull(diff);
-        // System.out.println(diff);
+        //System.out.println(diff);
         return JsonPath.parse(diff.toString());
     }
 

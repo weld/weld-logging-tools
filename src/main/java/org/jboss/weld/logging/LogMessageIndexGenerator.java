@@ -16,17 +16,23 @@
  */
 package org.jboss.weld.logging;
 
+import static org.jboss.weld.logging.Strings.ARTIFACT;
 import static org.jboss.weld.logging.Strings.DESCRIPTION;
 import static org.jboss.weld.logging.Strings.ID;
 import static org.jboss.weld.logging.Strings.INTERFACE;
 import static org.jboss.weld.logging.Strings.LOG_MESSAGE;
 import static org.jboss.weld.logging.Strings.MESSAGE;
 import static org.jboss.weld.logging.Strings.MESSAGES;
+import static org.jboss.weld.logging.Strings.MESSAGE_CLASS_NAME;
 import static org.jboss.weld.logging.Strings.METHOD_INFO;
+import static org.jboss.weld.logging.Strings.OPT_ARTIFACT;
+import static org.jboss.weld.logging.Strings.OPT_OUTPUT_FILE;
+import static org.jboss.weld.logging.Strings.OPT_PROJECT_VERSION;
 import static org.jboss.weld.logging.Strings.PROJECT_CODE;
 import static org.jboss.weld.logging.Strings.RETURN_TYPE;
 import static org.jboss.weld.logging.Strings.SIGNATURE;
 import static org.jboss.weld.logging.Strings.TOTAL;
+import static org.jboss.weld.logging.Strings.UNKNOWN;
 import static org.jboss.weld.logging.Strings.VERSION;
 
 import java.io.File;
@@ -65,24 +71,25 @@ import com.google.gson.JsonObject;
  *
  * <pre>
  * {
- *  version: "2.2.10.Final",
- *  total : 546,
- *  messages : [
+ *  "version" : "2.2.10.Final",
+ *  "artifact" : "org.jboss.weld:weld-core-impl"
+ *  "total" : 546,
+ *  "messages" : [
  *      {
- *          method : {
- *              sig : "logMe(String name)",
- *              retType: "void",
- *              interface: "org.jboss.weld.logging.BeanLogger"
+ *          "method" : {
+ *              "sig" : "logMe(String name)",
+ *              "retType" : "void",
+ *              "interface" : "org.jboss.weld.logging.BeanLogger"
  *          },
- *          log : {
+ *          "log" : {
  *              level : "INFO"
  *          },
- *          msg: {
- *              id : 1,
- *              value : "This is the real message: {0}",
- *              format: "MESSAGE_FORMAT"
+ *          "msg" : {
+ *              "id" : 1,
+ *              "value" : "This is the real message: {0}",
+ *              "format" : "MESSAGE_FORMAT"
  *          },
- *          desc: "Optional description taken from javadoc..."
+ *          "desc" : "Optional description taken from javadoc..."
  *      }
  *  ]
  * }
@@ -90,17 +97,15 @@ import com.google.gson.JsonObject;
  *
  * @author Martin Kouba
  */
-@SupportedAnnotationTypes({ Strings.MESSAGE_CLASS_NAME })
-@SupportedOptions({ LogMessageIndexGenerator.PROJECT_VERSION, LogMessageIndexGenerator.OUTPUT_FILE })
+@SupportedAnnotationTypes({ MESSAGE_CLASS_NAME })
+@SupportedOptions({ OPT_PROJECT_VERSION, OPT_OUTPUT_FILE, OPT_ARTIFACT })
 public class LogMessageIndexGenerator extends AbstractProcessor {
-
-    protected static final String PROJECT_VERSION = "projectVersion";
-
-    protected static final String OUTPUT_FILE = "outputFile";
 
     private File outputFile;
 
     private String version;
+
+    private String artifact;
 
     private List<LogMessage> logMessages = new ArrayList<LogMessage>();
 
@@ -112,11 +117,15 @@ public class LogMessageIndexGenerator extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        version = processingEnv.getOptions().get(PROJECT_VERSION);
+        version = processingEnv.getOptions().get(OPT_PROJECT_VERSION);
         if (version == null) {
-            version = "UNKNOWN";
+            version = UNKNOWN;
         }
-        outputFile = initOutputFile(processingEnv.getOptions().get(OUTPUT_FILE));
+        artifact = processingEnv.getOptions().get(OPT_ARTIFACT);
+        if (artifact == null) {
+            artifact = UNKNOWN;
+        }
+        outputFile = initOutputFile(processingEnv.getOptions().get(OPT_OUTPUT_FILE));
     }
 
     @Override
@@ -229,6 +238,7 @@ public class LogMessageIndexGenerator extends AbstractProcessor {
         }
         JsonObject data = new JsonObject();
         data.add(VERSION, Json.wrapPrimitive(version));
+        data.add(ARTIFACT, Json.wrapPrimitive(artifact));
         data.add(TOTAL, Json.wrapPrimitive(logMessages.size()));
         // Sort messages by id
         Collections.sort(logMessages, new Comparator<LogMessage>() {
@@ -274,8 +284,8 @@ public class LogMessageIndexGenerator extends AbstractProcessor {
 
     private File initOutputFile(String outputFilePath) {
         if (outputFilePath == null) {
-            outputFilePath = org.jboss.weld.logging.Files.getWorkingDirectory() + "target" + System.getProperty("file.separator") + "weld-log-message-idx-"
-                    + version + ".json";
+            outputFilePath = org.jboss.weld.logging.Files.getWorkingDirectory() + "target" + System.getProperty("file.separator") + "log-msg-idx_" + version + "_"
+                    + artifact.replaceAll("[^0-9a-zA-Z]", "-") + ".json";
         }
         return new File(outputFilePath);
     }

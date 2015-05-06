@@ -31,6 +31,7 @@ final class Strings {
     static final String LOG_MESSAGE_CLASS_NAME = "org.jboss.logging.annotations.LogMessage";
 
     static final String VERSION = "version";
+    static final String ARTIFACT = "artifact";
     static final String VERSIONS = "versions";
     static final String MESSAGES = "messages";
     static final String TOTAL = "total";
@@ -53,5 +54,10 @@ final class Strings {
     static final String VALUE = "value";
     static final String FORMAT = "format";
     static final String PROJECT_CODE = "projectCode";
+
+    static final String OPT_PROJECT_VERSION = "projectVersion";
+    static final String OPT_ARTIFACT = "artifact";
+    static final String OPT_OUTPUT_FILE = "outputFile";
+    static final String UNKNOWN = "UNKNOWN";
 
 }

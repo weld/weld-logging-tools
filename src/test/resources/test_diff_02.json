@@ -1,5 +1,6 @@
 {
 "version":"2.2.10.Final",
+"artifact" : "org.jboss.weld:weld-core-impl",
 "total":1,
 "messages":[
 {
