@@ -35,10 +35,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 
 import com.google.gson.JsonArray;
@@ -184,15 +186,18 @@ public class LogMessageIndexDiff {
         // Build indexes metadata and check compared versions
         JsonArray indexesMeta = new JsonArray();
         List<String> indexesIds = new ArrayList<String>();
+        Set<JsonElement> versions = new HashSet<JsonElement>();
         for (ListIterator<JsonObject> iterator = indexes.listIterator(); iterator.hasNext();) {
             JsonObject index = iterator.next();
-            String indexId = index.get(VERSION).getAsString() + index.get(ARTIFACT).getAsString();
+            JsonElement version = index.get(VERSION);
+            versions.add(version);
+            String indexId = version.getAsString() + index.get(ARTIFACT).getAsString();
             if (indexesIds.contains(indexId)) {
                 throw new IllegalStateException("Unable to compare index files with the same composite identifier (version and artifact id): " + indexId);
             }
             indexesIds.add(indexId);
             JsonObject indexMeta = new JsonObject();
-            indexMeta.add(VERSION, index.get(VERSION));
+            indexMeta.add(VERSION, version);
             indexMeta.add(ARTIFACT, index.get(ARTIFACT));
             indexMeta.add(TOTAL, index.get(TOTAL));
             indexMeta.add(FILE_PATH, Json.wrapPrimitive(indexFiles.get(iterator.previousIndex()).toPath().toString()));
@@ -201,7 +206,7 @@ public class LogMessageIndexDiff {
 
         // Now let's find the differences
         // Note that messages don't need to have the ID specified (0) or may inherit the ID from another message with the same name (-1)
-        JsonArray differences = findDifferences(indexes.size(), detectCollisionsOnly, buildDataMap(indexes));
+        JsonArray differences = findDifferences(versions.size(), detectCollisionsOnly, buildDataMap(indexes));
 
         JsonObject diff = new JsonObject();
         diff.add(INDEXES, indexesMeta);

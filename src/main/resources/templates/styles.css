@@ -125,12 +125,6 @@ span.idx {
 
 .id {
   background-color: black;
-  width: 6.2em;
-}
-
-.id-title {
-  background-color: black;
-  width: 8em;
 }
 
 .version, .code {
