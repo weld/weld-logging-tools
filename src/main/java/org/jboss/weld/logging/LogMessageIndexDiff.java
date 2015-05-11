@@ -37,8 +37,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -188,7 +188,7 @@ public class LogMessageIndexDiff {
         JsonArray indexesMeta = new JsonArray();
         List<String> indexesIds = new ArrayList<String>();
         Set<JsonElement> versions = new HashSet<JsonElement>();
-        for (ListIterator<JsonObject> iterator = indexes.listIterator(); iterator.hasNext();) {
+        for (Iterator<JsonObject> iterator = indexes.iterator(); iterator.hasNext();) {
             JsonObject index = iterator.next();
             JsonElement version = index.get(VERSION);
             versions.add(version);
@@ -201,7 +201,7 @@ public class LogMessageIndexDiff {
             indexMeta.add(VERSION, version);
             indexMeta.add(ARTIFACT, index.get(ARTIFACT));
             indexMeta.add(TOTAL, index.get(TOTAL));
-            indexMeta.add(FILE_PATH, Json.wrapPrimitive(indexFiles.get(iterator.previousIndex()).toPath().toString()));
+            indexMeta.add(FILE_PATH, index.get(FILE_PATH));
             indexesMeta.add(indexMeta);
         }
 
@@ -234,7 +234,9 @@ public class LogMessageIndexDiff {
         List<JsonObject> indexes = new ArrayList<JsonObject>();
         for (File indexFile : indexFiles) {
             try {
-                indexes.add(Json.readJsonElementFromFile(indexFile).getAsJsonObject());
+                JsonObject index = Json.readJsonElementFromFile(indexFile).getAsJsonObject();
+                index.add(FILE_PATH, Json.wrapPrimitive(indexFile.toPath().toString()));
+                indexes.add(index);
             } catch (IOException e) {
                 throw new IllegalStateException("Unable to parse the index file: " + indexFile, e);
             }
