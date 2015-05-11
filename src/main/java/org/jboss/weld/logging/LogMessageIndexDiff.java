@@ -34,6 +34,7 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -238,6 +239,15 @@ public class LogMessageIndexDiff {
                 throw new IllegalStateException("Unable to parse the index file: " + indexFile, e);
             }
         }
+        // Sort indexes by version and artifact
+        Collections.sort(indexes, new Comparator<JsonObject>() {
+            @Override
+            public int compare(JsonObject o1, JsonObject o2) {
+                // Version and artifact must be always set
+                int result = o1.get(VERSION).getAsString().compareTo(o2.get(VERSION).getAsString());
+                return result == 0 ? o1.get(ARTIFACT).getAsString().compareTo(o2.get(ARTIFACT).getAsString()) : result;
+            }
+        });
         return indexes;
     }
 
