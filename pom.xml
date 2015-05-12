@@ -21,6 +21,12 @@
     </license>
   </licenses>
 
+  <scm>
+    <connection>scm:git:git://github.com/weld/weld-logging-tools.git</connection>
+    <developerConnection>scm:git:git@github.com:weld/weld-logging-tools.git</developerConnection>
+    <url>https://github.com/weld/weld-logging-tools</url>
+  </scm>
+
   <developers>
     <developer>
       <name>Weld committers</name>
