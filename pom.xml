@@ -113,7 +113,8 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <finalName>weld-logging-tools-shaded-${project.version}</finalName>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>shaded</shadedClassifierName>
             </configuration>
           </execution>
         </executions>
