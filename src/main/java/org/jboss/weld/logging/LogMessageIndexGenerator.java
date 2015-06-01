@@ -226,6 +226,12 @@ public class LogMessageIndexGenerator extends AbstractProcessor {
     private void createIndex() throws IOException {
         if (!outputFile.exists()) {
             try {
+                File parent = outputFile.getParentFile();
+                if (parent != null) {
+                    if (!parent.mkdirs() && !parent.isDirectory()) {
+                        throw new IOException("Parent directory could not be created: " + parent);
+                    }
+                }
                 outputFile.createNewFile();
             } catch (IOException e) {
                 StringWriter writer = new StringWriter();
@@ -284,8 +290,8 @@ public class LogMessageIndexGenerator extends AbstractProcessor {
 
     private File initOutputFile(String outputFilePath) {
         if (outputFilePath == null) {
-            outputFilePath = org.jboss.weld.logging.Files.getWorkingDirectory() + "target" + System.getProperty("file.separator") + "log-msg-idx_" + version + "_"
-                    + artifact.replaceAll("[^0-9a-zA-Z]", "-") + ".json";
+            outputFilePath = org.jboss.weld.logging.Files.getWorkingDirectory() + "target" + System.getProperty("file.separator") + "log-msg-idx_" + version
+                    + "_" + artifact.replaceAll("[^0-9a-zA-Z]", "-") + ".json";
         }
         return new File(outputFilePath);
     }
