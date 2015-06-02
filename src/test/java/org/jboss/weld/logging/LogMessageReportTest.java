@@ -59,6 +59,18 @@ public class LogMessageReportTest {
         assertReports(expected, result);
     }
 
+    @Test
+    public void testDiffReportNullDifferences() throws IOException {
+        LogMessageReport report = new LogMessageReport();
+        StringWriter writer = new StringWriter();
+        report.generate(new File("src/test/resources/test_diff_result_null.json"), writer);
+        String result = writer.toString();
+        String expected = new String(Files.readAllBytes(new File("src/test/resources/test_diff_report_result_null.html").toPath()), charset);
+        // For debug purpose
+        Files.write(new File("target/log-message-diff-report-null.html").toPath(), writer.toString().getBytes());
+        assertReports(expected, result);
+    }
+
     private void assertReports(String expected, String result) {
         assertEquals(expected.substring(0, expected.indexOf("Generated")), result.substring(0, result.indexOf("Generated")));
     }
