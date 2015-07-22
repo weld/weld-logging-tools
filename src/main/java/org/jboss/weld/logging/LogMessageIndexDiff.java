@@ -25,6 +25,8 @@ import static org.jboss.weld.logging.Strings.INDEXES;
 import static org.jboss.weld.logging.Strings.MESSAGE;
 import static org.jboss.weld.logging.Strings.MESSAGES;
 import static org.jboss.weld.logging.Strings.PROJECT_CODE;
+import static org.jboss.weld.logging.Strings.SUPPRESSIONS;
+import static org.jboss.weld.logging.Strings.SUPPRESS_WARNINGS_PREFIX;
 import static org.jboss.weld.logging.Strings.TOTAL;
 import static org.jboss.weld.logging.Strings.VALUE;
 import static org.jboss.weld.logging.Strings.VERSION;
@@ -33,6 +35,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -48,6 +51,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * Generates a diff file with the following JSON format:
@@ -300,8 +304,11 @@ public class LogMessageIndexDiff {
 
     private JsonArray findDifferences(int indexCount, boolean detectCollisionsOnly, Map<String, Map<Integer, Map<String, List<JsonObject>>>> dataMap) {
         JsonArray differences = new JsonArray();
+        // Project code -> map of ids to...
         for (Entry<String, Map<Integer, Map<String, List<JsonObject>>>> entry : dataMap.entrySet()) {
+            // ID -> map of versions to messages
             for (Entry<Integer, Map<String, List<JsonObject>>> idEntry : entry.getValue().entrySet()) {
+                // For every ID attempt to find a difference for all messages with this id among all indexes
                 if (isDifference(indexCount, detectCollisionsOnly, idEntry.getValue())) {
                     JsonObject difference = new JsonObject();
                     difference.add(PROJECT_CODE, Json.wrapPrimitive(entry.getKey()));
@@ -333,15 +340,84 @@ public class LogMessageIndexDiff {
                 // The ID not found in all versions
                 return true;
             }
-            if (current.size() == 1) {
+            if (current.size() == 1 && previous.size() == 1) {
                 // Very often there will be only one element in the list
-                return !current.get(0).equals(previous.get(0));
+                return !areMessagesEqual(current.get(0), previous.get(0));
             }
-            if (!current.containsAll(previous)) {
+            // There are several messages with the same ID
+            if (!detectCollisionsOnly) {
+                // A diff is detected if the lists do not contain the same messages
+                // At this point we can be sure the lists have the same size
+                // Note that suppressions must be taken into account
+                for (JsonObject previousMessage : previous) {
+                    if (!messageListContains(current, previousMessage)) {
+                        return true;
+                    }
+                }
+            }
+            // TODO A collision is never detected if there are several messages with the same ID
+        }
+        return false;
+    }
+
+    private boolean areMessagesEqual(JsonObject msg1, JsonObject msg2) {
+        List<String> suppressions = extractSuppressions(msg1);
+        suppressions.addAll(extractSuppressions(msg2));
+        if (!suppressions.isEmpty()) {
+            // Make a copy of JSON representations first
+            // TODO This way is neither nice nor effective
+            JsonParser parser = new JsonParser();
+            msg1 = parser.parse(msg1.toString()).getAsJsonObject();
+            msg2 = parser.parse(msg2.toString()).getAsJsonObject();
+            msg1.remove(SUPPRESSIONS);
+            msg2.remove(SUPPRESSIONS);
+            // Then remove all suppressed members
+            // E.g. for @SuppressWarnings("weldlog:msg-value") we'd like to remove msgObj.msg.value
+            for (String suppression : suppressions) {
+                String[] suppressionParts = suppression.substring(SUPPRESS_WARNINGS_PREFIX.length()).split("-");
+                removeSuppressedMember(msg1, suppressionParts);
+                removeSuppressedMember(msg2, suppressionParts);
+            }
+        }
+        return msg1.equals(msg2);
+    }
+
+    private void removeSuppressedMember(JsonObject msg, String[] suppressionParts) {
+        JsonObject last = findLastJsonObject(msg, suppressionParts);
+        if (last != null) {
+            last.remove(suppressionParts[suppressionParts.length - 1]);
+        }
+    }
+
+    private JsonObject findLastJsonObject(JsonObject jsonObject, String[] suppressionParts) {
+        if (suppressionParts.length == 1) {
+            return jsonObject;
+        }
+        JsonElement memberObject = jsonObject.get(suppressionParts[0]);
+        if (memberObject != null && memberObject.isJsonObject()) {
+            return findLastJsonObject(memberObject.getAsJsonObject(), Arrays.copyOfRange(suppressionParts, 1, suppressionParts.length));
+        }
+        return null;
+    }
+
+    private boolean messageListContains(List<JsonObject> messages, JsonObject msg) {
+        for (JsonObject element : messages) {
+            if (areMessagesEqual(element, msg)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private List<String> extractSuppressions(JsonObject msg) {
+        List<String> suppressionValues = new ArrayList<>();
+        JsonElement suppressions = msg.get(SUPPRESSIONS);
+        if (suppressions != null && suppressions.isJsonArray()) {
+            for (JsonElement suppression : suppressions.getAsJsonArray()) {
+                suppressionValues.add(suppression.getAsString());
+            }
+        }
+        return suppressionValues;
     }
 
     private File initOutputFile(File outputFile) {

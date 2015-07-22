@@ -29,6 +29,7 @@ final class Strings {
     static final String MESSAGE_LOGGER_CLASS_NAME = "org.jboss.logging.annotations.MessageLogger";
     static final String MESSAGE_CLASS_NAME = "org.jboss.logging.annotations.Message";
     static final String LOG_MESSAGE_CLASS_NAME = "org.jboss.logging.annotations.LogMessage";
+    static final String SUPPRESS_WARNINGS_CLASS_NAME = "java.lang.SuppressWarnings";
 
     static final String VERSION = "version";
     static final String ARTIFACT = "artifact";
@@ -43,6 +44,9 @@ final class Strings {
     static final String FILE_PATH = "filePath";
     static final String INDEXES = "indexes";
     static final String DETECT_COLLISIONS_ONLY = "detectCollisionsOnly";
+
+    static final String SUPPRESSIONS = "suppressions";
+    static final String SUPPRESS_WARNINGS_PREFIX = "weldlog:";
 
     static final String SIGNATURE = "sig";
     static final String RETURN_TYPE = "retType";

@@ -21,6 +21,7 @@ import static org.jboss.weld.logging.Strings.DESCRIPTION;
 import static org.jboss.weld.logging.Strings.ID;
 import static org.jboss.weld.logging.Strings.INTERFACE;
 import static org.jboss.weld.logging.Strings.LOG_MESSAGE;
+import static org.jboss.weld.logging.Strings.LOG_MESSAGE_CLASS_NAME;
 import static org.jboss.weld.logging.Strings.MESSAGE;
 import static org.jboss.weld.logging.Strings.MESSAGES;
 import static org.jboss.weld.logging.Strings.MESSAGE_CLASS_NAME;
@@ -31,8 +32,12 @@ import static org.jboss.weld.logging.Strings.OPT_PROJECT_VERSION;
 import static org.jboss.weld.logging.Strings.PROJECT_CODE;
 import static org.jboss.weld.logging.Strings.RETURN_TYPE;
 import static org.jboss.weld.logging.Strings.SIGNATURE;
+import static org.jboss.weld.logging.Strings.SUPPRESS_WARNINGS_CLASS_NAME;
+import static org.jboss.weld.logging.Strings.SUPPRESSIONS;
+import static org.jboss.weld.logging.Strings.SUPPRESS_WARNINGS_PREFIX;
 import static org.jboss.weld.logging.Strings.TOTAL;
 import static org.jboss.weld.logging.Strings.UNKNOWN;
+import static org.jboss.weld.logging.Strings.VALUE;
 import static org.jboss.weld.logging.Strings.VERSION;
 
 import java.io.File;
@@ -89,7 +94,8 @@ import com.google.gson.JsonObject;
  *              "value" : "This is the real message: {0}",
  *              "format" : "MESSAGE_FORMAT"
  *          },
- *          "desc" : "Optional description taken from javadoc..."
+ *          "desc" : "Optional description taken from javadoc...",
+ *          "suppressions" : ["weldlog:msg-value"]
  *      }
  *  ]
  * }
@@ -193,13 +199,13 @@ public class LogMessageIndexGenerator extends AbstractProcessor {
             // We don't need the default values
             // processingEnv.getElementUtils().getElementValuesWithDefaults(annotationMirror);
 
-            if (annotationType.equals(Strings.LOG_MESSAGE_CLASS_NAME)) {
+            if (annotationType.equals(LOG_MESSAGE_CLASS_NAME)) {
                 JsonObject logMessage = new JsonObject();
                 for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotationParameters.entrySet()) {
                     logMessage.add(entry.getKey().getSimpleName().toString(), Json.wrapPrimitive(entry.getValue()));
                 }
                 json.add(LOG_MESSAGE, logMessage);
-            } else if (annotationType.equals(Strings.MESSAGE_CLASS_NAME)) {
+            } else if (annotationType.equals(MESSAGE_CLASS_NAME)) {
                 JsonObject message = new JsonObject();
                 for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotationParameters.entrySet()) {
                     message.add(entry.getKey().getSimpleName().toString(), Json.wrapPrimitive(entry.getValue()));
@@ -208,6 +214,22 @@ public class LogMessageIndexGenerator extends AbstractProcessor {
                     }
                 }
                 json.add(MESSAGE, message);
+            } else if (annotationType.equals(SUPPRESS_WARNINGS_CLASS_NAME)) {
+                // Also store @SuppressWarnings values with "weldlog:" prefix so that we're able to ignore expected collisions
+                JsonArray suppressions = new JsonArray();
+                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotationParameters.entrySet()) {
+                    if (entry.getKey().getSimpleName().toString().equals(VALUE)) {
+                        @SuppressWarnings("unchecked")
+                        List<? extends AnnotationValue> values = (List<? extends AnnotationValue>) entry.getValue().getValue();
+                        for (AnnotationValue annotationValue : values) {
+                            String value = annotationValue.getValue().toString();
+                            if(value.startsWith(SUPPRESS_WARNINGS_PREFIX)) {
+                                suppressions.add(Json.wrapPrimitive(value));
+                            }
+                        }
+                    }
+                }
+                json.add(SUPPRESSIONS, suppressions);
             }
         }
 

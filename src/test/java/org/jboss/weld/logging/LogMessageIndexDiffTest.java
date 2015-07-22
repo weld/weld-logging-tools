@@ -76,14 +76,38 @@ public class LogMessageIndexDiffTest {
         levels = ctx.read("$.differences[0].messages[?(@.version == '3.0.0-SNAPSHOT')].value.log.level");
         assertEquals(1, levels.size());
         assertTrue(levels.contains("DEBUG"));
+    }
 
-        ctx = getReadContext(true, new File("src/test/resources/test_diff_01.json"), new File("src/test/resources/test_diff_03.json"));
+    @Test
+    public void testNoCollisionsFound() {
+        ReadContext ctx = getReadContext(true, new File("src/test/resources/test_diff_01.json"), new File("src/test/resources/test_diff_03.json"));
         assertThat(ctx.<Integer> read("$.total"), is(0));
         assertNull(ctx.read("$.differences"));
 
         ctx = getReadContext(true, new File("src/test/resources/test_coll_01.json"), new File("src/test/resources/test_coll_02.json"));
         assertThat(ctx.<Integer> read("$.total"), is(0));
         assertNull(ctx.read("$.differences"));
+    }
+
+    @Test
+    public void testMessageValueSuppressed() {
+        ReadContext ctx = getReadContext(true, new File("src/test/resources/test_coll_01.json"), new File("src/test/resources/test_coll_03.json"));
+        assertThat(ctx.<Integer> read("$.total"), is(0));
+        assertNull(ctx.read("$.differences"));
+    }
+
+    @Test
+    public void testLogMessageSuppressed() {
+        ReadContext ctx = getReadContext(true, new File("src/test/resources/test_coll_01.json"), new File("src/test/resources/test_coll_04.json"));
+        assertThat(ctx.<Integer> read("$.total"), is(0));
+        assertNull(ctx.read("$.differences"));
+    }
+
+    @Test
+    public void testMultipleDifferentMessagesWithTheSameId() {
+        ReadContext ctx = getReadContext(false, new File("src/test/resources/test_diff_04.json"), new File("src/test/resources/test_diff_05.json"));
+        assertThat(ctx.<Integer> read("$.total"), is(1));
+        assertThat(ctx.<Integer> read("$.differences[0].id"), is(0));
     }
 
     ReadContext getReadContext(boolean detectCollisionsOnly, File... indexFiles) {
