@@ -104,6 +104,13 @@ public class LogMessageIndexDiffTest {
     }
 
     @Test
+    public void testMethodSignatureSuppressed() {
+        ReadContext ctx = getReadContext(true, new File("src/test/resources/test_coll_01.json"), new File("src/test/resources/test_coll_05.json"));
+        assertThat(ctx.<Integer> read("$.total"), is(0));
+        assertNull(ctx.read("$.differences"));
+    }
+
+    @Test
     public void testMultipleDifferentMessagesWithTheSameId() {
         ReadContext ctx = getReadContext(false, new File("src/test/resources/test_diff_04.json"), new File("src/test/resources/test_diff_05.json"));
         assertThat(ctx.<Integer> read("$.total"), is(1));

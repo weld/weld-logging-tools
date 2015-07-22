@@ -365,7 +365,6 @@ public class LogMessageIndexDiff {
         suppressions.addAll(extractSuppressions(msg2));
         if (!suppressions.isEmpty()) {
             // Make a copy of JSON representations first
-            // TODO This way is neither nice nor effective
             JsonParser parser = new JsonParser();
             msg1 = parser.parse(msg1.toString()).getAsJsonObject();
             msg2 = parser.parse(msg2.toString()).getAsJsonObject();
