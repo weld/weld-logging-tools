@@ -39,7 +39,7 @@
     <maven.compiler.target>1.7</maven.compiler.target>
     <!-- Versions -->
     <version.gson>2.3.1</version.gson>
-    <version.trimou>1.8.0.Final</version.trimou>
+    <version.trimou>1.8.3.Final</version.trimou>
     <version.junit>4.11</version.junit>
     <version.json-path>2.0.0</version.json-path>
     <version.slf4j>1.7.10</version.slf4j>
