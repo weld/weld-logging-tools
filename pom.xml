@@ -38,7 +38,6 @@
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
     <!-- Versions -->
-    <version.gson>2.3.1</version.gson>
     <version.trimou>2.0.0.Final</version.trimou>
     <version.junit>4.11</version.junit>
     <version.json-path>2.0.0</version.json-path>
@@ -46,12 +45,6 @@
   </properties>
 
   <dependencies>
-
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>${version.gson}</version>
-    </dependency>
 
     <dependency>
       <groupId>org.trimou</groupId>
