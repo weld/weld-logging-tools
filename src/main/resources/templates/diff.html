@@ -34,9 +34,11 @@
     {{/each}}
   </table>
   <h2>Differences ({{total}})</h2>
+  {{#unless differences.isJsonNull}}
   {{#each differences}}
     <div class="diff-container">
-        <div class="diff-title boxed id"><span class="idx">{{iterIndex}}.</span> {{projectCode}}{{id}}</div>
+        <h3><span class="idx">{{iterIndex}}.</span> <span class="diff-title boxed id">{{projectCode}}{{id}}</span></h3>
+        <div>Collisions: <ul>{{#each collisions}}<li>{{this}}</li>{{/each}}</ul></div>
         {{#each messages}}
         <div class="msg-container">
           <div class="msg-title">
@@ -54,6 +56,7 @@
        {{/each}}
     </div>
   {{/each}}
+  {{/unless}}
   {{/with}}
   Generated at {{timestamp}}.
 </body>

@@ -34,6 +34,9 @@ import org.trimou.engine.MustacheEngineBuilder;
 import org.trimou.engine.config.EngineConfigurationKey;
 import org.trimou.engine.locator.ClassPathTemplateLocator;
 import org.trimou.engine.resolver.MapResolver;
+import org.trimou.engine.resolver.ReflectionResolver;
+import org.trimou.engine.resolver.ThisResolver;
+import org.trimou.gson.converter.GsonValueConverter;
 import org.trimou.gson.resolver.JsonElementResolver;
 import org.trimou.handlebars.HelpersBuilder;
 
@@ -81,10 +84,18 @@ public class LogMessageReport {
 
             JsonObject json = Json.readJsonElementFromFile(indexFile).getAsJsonObject();
 
-            MustacheEngine engine = MustacheEngineBuilder.newBuilder().omitServiceLoaderConfigurationExtensions()
+            MustacheEngine engine = MustacheEngineBuilder
+                    .newBuilder()
+                    .omitServiceLoaderConfigurationExtensions()
                     .setProperty(EngineConfigurationKey.PRECOMPILE_ALL_TEMPLATES, false)
-                    .addTemplateLocator(ClassPathTemplateLocator.builder(1).setRootPath("templates").build()).addResolver(new MapResolver())
-                    .addResolver(new JsonElementResolver()).registerHelpers(HelpersBuilder.all().build()).build();
+                    .addTemplateLocator(ClassPathTemplateLocator.builder(1).setRootPath("templates").build())
+                    .addResolver(new ThisResolver())
+                    .addResolver(new MapResolver())
+                    .addResolver(new JsonElementResolver())
+                    .addResolver(new ReflectionResolver())
+                    .registerHelpers(HelpersBuilder.all().build())
+                    .addValueConverter(new GsonValueConverter())
+                    .build();
             Mustache mustache;
 
             if (json.has(VERSION)) {

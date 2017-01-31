@@ -41,6 +41,7 @@ final class Strings {
     static final String METHOD_INFO = "method";
     static final String DESCRIPTION = "desc";
     static final String DIFFERENCES = "differences";
+    static final String COLLISIONS = "collisions";
     static final String FILE_PATH = "filePath";
     static final String INDEXES = "indexes";
     static final String DETECT_COLLISIONS_ONLY = "detectCollisionsOnly";

@@ -76,6 +76,9 @@ public class LogMessageIndexDiffTest {
         levels = ctx.read("$.differences[0].messages[?(@.version == '3.0.0-SNAPSHOT')].value.log.level");
         assertEquals(1, levels.size());
         assertTrue(levels.contains("DEBUG"));
+        List<String> collisions = ctx.read("$.differences[0].collisions");
+        assertEquals(1, collisions.size());
+        assertEquals("log-level", collisions.get(0));
     }
 
     @Test

@@ -53,7 +53,7 @@ table tr td, table tr th {
   font-weight: bold;
   font-size: 12px;
   padding: 5px;
-  border-radius: 4px;
+  border-radius: 3px;
   color: white;
   display: inline-block;
 }
@@ -92,11 +92,10 @@ div.diff-container {
   margin-bottom: 20px;
 }
 
-div.diff-title {
+.diff-title {
   font-family: sans-serif;
   font-size: 20px;
   font-weight: bold;
-  margin-bottom: 5px;
 }
 
 span.msg-sig {
@@ -124,7 +123,7 @@ span.idx {
 }
 
 .id {
-  background-color: black;
+  background-color: #101010;
 }
 
 .version, .code {

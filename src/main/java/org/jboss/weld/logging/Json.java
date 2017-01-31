@@ -22,9 +22,11 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.Collection;
 
 import javax.lang.model.element.AnnotationValue;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonParser;
@@ -71,6 +73,14 @@ final class Json {
             return new JsonPrimitive((Boolean) value);
         }
         return new JsonPrimitive(value.toString());
+    }
+
+    static JsonArray arrayFromPrimitives(Collection<?> elements) {
+        JsonArray jsonArray = new JsonArray();
+        for (Object element : elements) {
+            jsonArray.add(wrapPrimitive(element));
+        }
+        return jsonArray;
     }
 
 }

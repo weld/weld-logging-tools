@@ -59,7 +59,7 @@ table tr td, table tr th {
   font-weight: bold;
   font-size: 12px;
   padding: 5px;
-  border-radius: 4px;
+  border-radius: 3px;
   color: white;
   display: inline-block;
 }
@@ -98,11 +98,10 @@ div.diff-container {
   margin-bottom: 20px;
 }
 
-div.diff-title {
+.diff-title {
   font-family: sans-serif;
   font-size: 20px;
   font-weight: bold;
-  margin-bottom: 5px;
 }
 
 span.msg-sig {
@@ -130,7 +129,7 @@ span.idx {
 }
 
 .id {
-  background-color: black;
+  background-color: #101010;
 }
 
 .version, .code {
@@ -198,7 +197,8 @@ span.idx {
   </table>
   <h2>Differences (1)</h2>
     <div class="diff-container">
-        <div class="diff-title boxed id"><span class="idx">1.</span> WELD-600</div>
+        <h3><span class="idx">1.</span> <span class="diff-title boxed id">WELD-600</span></h3>
+        <div>Collisions: <ul><li>log-level</li></ul></div>
         <div class="msg-container">
           <div class="msg-title">
             <div class="boxed version">3.0.0-SNAPSHOT</div> <div class="boxed DEBUG">DEBUG</div>
